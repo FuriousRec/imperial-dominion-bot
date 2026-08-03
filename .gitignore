@@ -1,0 +1,10 @@
+*.class
+*.jar
+*.log
+.idea/
+.vscode/
+.metals/
+META-INF/
+lib/
+out/
+target/
