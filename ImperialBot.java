@@ -24,8 +24,7 @@ public class ImperialBot implements BotInterface {
     // ANCHOR: STAGE CONTROL VARIABLES
     private int stage = 0;
 
-    private long waitUntilRound = -1;
-    private String waitingFor = "";
+    private final ActionCooldown actionCooldown = new ActionCooldown();
 
     public void init(Bot bot) {
         printRecipe(bot, RecipeName.HIRE_WORKER);
@@ -59,7 +58,7 @@ public class ImperialBot implements BotInterface {
             System.out.println("========================================");
 
             System.out.println("STAGE: " + stage);
-            System.out.println("WAITING_FOR: " + waitingFor);
+            System.out.println("WAITING_FOR: " + actionCooldown.waitingFor());
 
             System.out.println("ENERGY: " + state.resource(ResourceName.ENERGY));
             System.out.println("FOOD: " + state.resource(ResourceName.FOOD));
@@ -127,7 +126,7 @@ public class ImperialBot implements BotInterface {
         // ANCHOR: BUILD WAIT BLOCK
         // Wait before updateStage. This prevents the bot from advancing and stacking
         // another action while an earlier action is still settling.
-        if (state.getRound() < waitUntilRound) {
+        if (actionCooldown.isWaiting(state.getRound())) {
             return;
         }
 
@@ -1126,8 +1125,11 @@ public class ImperialBot implements BotInterface {
         boolean success = state.scheduleAction(recipe, 1).get();
         System.out.println("Tried: " + label + ", success: " + success);
 
-        waitingFor = label;
-        waitUntilRound = state.getRound() + 5;
+        actionCooldown.recordAttempt(
+                success,
+                state.getRound(),
+                5,
+                label);
 
         return success;
     }
@@ -1137,8 +1139,11 @@ public class ImperialBot implements BotInterface {
         boolean success = state.scheduleAction(RecipeName.HIRE_WORKER, 1).get();
         System.out.println("Tried: " + label + ", success: " + success);
 
-        waitingFor = label;
-        waitUntilRound = state.getRound() + 5;
+        actionCooldown.recordAttempt(
+                success,
+                state.getRound(),
+                5,
+                label);
 
         return success;
     }
@@ -1148,8 +1153,11 @@ public class ImperialBot implements BotInterface {
         boolean success = state.scheduleAction(recipe, 1).get();
         System.out.println("Tried: " + label + ", success: " + success);
 
-        waitingFor = label;
-        waitUntilRound = state.getRound() + 2;
+        actionCooldown.recordAttempt(
+                success,
+                state.getRound(),
+                2,
+                label);
 
         return success;
     }
@@ -1159,8 +1167,11 @@ public class ImperialBot implements BotInterface {
         boolean success = state.scheduleAction(recipe, 1).get();
         System.out.println("Tried: " + label + ", success: " + success);
 
-        waitingFor = label;
-        waitUntilRound = state.getRound() + 1;
+        actionCooldown.recordAttempt(
+                success,
+                state.getRound(),
+                1,
+                label);
 
         return success;
     }
@@ -1174,8 +1185,7 @@ public class ImperialBot implements BotInterface {
 
     // ANCHOR: CLEAR WAIT HELPER
     private void clearWait() {
-        waitingFor = "";
-        waitUntilRound = -1;
+        actionCooldown.clear();
     }
 
     private void printRecipe(Bot bot, RecipeName recipe) {

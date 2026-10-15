@@ -33,3 +33,16 @@ The included run summary shows the bot reaching the final science objective:
 ROCKET SCIENCE BUILT. COMPLETE CHECKPOINT.
 Game ended with: COMPLETE (SUCCESS)
 ```
+
+## Testing
+
+The repository includes minimal API stubs for the proprietary course engine. They
+allow CI to compile the complete bot source without redistributing the engine,
+while engine-independent unit tests verify action cooldown behavior.
+
+```bash
+bash test/run-tests.sh
+```
+
+GitHub Actions runs the compile and test checks on Java 17 and Java 21. A full
+simulation still requires the official course-provided runner.
