@@ -1091,14 +1091,19 @@ public class ImperialBot implements BotInterface {
 
     // ANCHOR: ROCKET READY HELPER
     private boolean rocketReady(StateInterface state) {
-        return state.resource(ResourceName.LAB) >= 1 &&
-                state.resource(ResourceName.ROCKET_SCIENCE) < 1 &&
-                state.resource(ResourceName.BUILDING_SLOTS) >= 1 &&
-                state.resource(ResourceName.CURRENCY) >= 8000 &&
-                state.resource(ResourceName.ENERGY) >= 300 &&
-                state.resource(ResourceName.IRON) >= 200 &&
-                state.resource(ResourceName.WOOD) >= 100 &&
-                state.resource(ResourceName.WORKER_WITH_JOB) >= 30;
+        return RocketReadiness.isReady(rocketSnapshot(state));
+    }
+
+    private RocketReadiness.Snapshot rocketSnapshot(StateInterface state) {
+        return new RocketReadiness.Snapshot(
+                state.resource(ResourceName.LAB),
+                state.resource(ResourceName.ROCKET_SCIENCE),
+                state.resource(ResourceName.BUILDING_SLOTS),
+                state.resource(ResourceName.CURRENCY),
+                state.resource(ResourceName.ENERGY),
+                state.resource(ResourceName.IRON),
+                state.resource(ResourceName.WOOD),
+                freeWorkers(state));
     }
 
     // ANCHOR: SCIENCE DIAGNOSTIC HELPER
@@ -1117,7 +1122,8 @@ public class ImperialBot implements BotInterface {
                 + " idleWorkers=" + state.resource(ResourceName.WORKER_WITHOUT_JOB)
                 + " university=" + state.resource(ResourceName.UNIVERSITY)
                 + " lab=" + state.resource(ResourceName.LAB)
-                + " rocket=" + state.resource(ResourceName.ROCKET_SCIENCE));
+                + " rocket=" + state.resource(ResourceName.ROCKET_SCIENCE)
+                + " blockers=" + RocketReadiness.blockers(rocketSnapshot(state)));
     }
 
     // ANCHOR: BUILDING SCHEDULE HELPER
