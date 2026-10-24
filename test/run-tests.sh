@@ -8,7 +8,9 @@ mkdir -p "$build_dir"
 javac -Xlint:all -Werror -d "$build_dir" \
     ImperialBot.java \
     ActionCooldown.java \
+    RocketReadiness.java \
     test/ActionCooldownTest.java \
+    test/RocketReadinessTest.java \
     test-stubs/de/athron/gitlab/imperial_dominion/Bot.java \
     test-stubs/de/athron/gitlab/imperial_dominion/BotInterface.java \
     test-stubs/de/athron/gitlab/imperial_dominion/StateInterface.java \
@@ -16,3 +18,4 @@ javac -Xlint:all -Werror -d "$build_dir" \
     test-stubs/de/athron/gitlab/imperial_dominion/jni/libgame/ResourceName.java
 
 java -ea -cp "$build_dir" ActionCooldownTest
+java -ea -cp "$build_dir" RocketReadinessTest
