@@ -106,14 +106,22 @@ public class ImperialBot implements BotInterface {
             System.out.println("FAILED: " + state.isFailed());
         }
 
+        // ANCHOR: ACCEPTED ACTION WAIT BLOCK
+        // Apply the cooldown before every recovery or stage action. In particular,
+        // an accepted emergency FIRE_WORKER action may take several rounds to settle;
+        // resubmitting it early can fire more workers than the strategy intended.
+        if (actionCooldown.isWaiting(state.getRound())) {
+            return;
+        }
+
         // ANCHOR: SAFETY BLOCK
         if (state.resource(ResourceName.WORKER_WITHOUT_JOB) < 1) {
             // In the science sprint the key recipes spend WORKER_WITH_JOB, not idle
             // workers. Do not keep firing workers once we already have enough free
             // employed workers to start the University/Lab/Rocket chain.
             if (stage >= 21) {
-                // Late science recipes do not need idle workers. Let the normal wait
-                // and stage logic continue instead of firing workers.
+                // Late science recipes do not need idle workers. Let the normal stage
+                // logic continue instead of firing workers.
             } else if (state.resource(ResourceName.WORKER_WITH_JOB) > 10) {
                 tryScheduleBuilding(state, RecipeName.FIRE_WORKER, "EMERGENCY_FIRE_WORKER_RECOVERY");
                 return;
@@ -121,13 +129,6 @@ public class ImperialBot implements BotInterface {
                 System.out.println("Safety stop: WORKER_WITHOUT_JOB below 1 and cannot recover.");
                 return;
             }
-        }
-
-        // ANCHOR: BUILD WAIT BLOCK
-        // Wait before updateStage. This prevents the bot from advancing and stacking
-        // another action while an earlier action is still settling.
-        if (actionCooldown.isWaiting(state.getRound())) {
-            return;
         }
 
         // ANCHOR: STAGE UPDATE BLOCK

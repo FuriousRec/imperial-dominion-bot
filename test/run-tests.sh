@@ -10,6 +10,7 @@ javac -Xlint:all -Werror -d "$build_dir" \
     ActionCooldown.java \
     RocketReadiness.java \
     test/ActionCooldownTest.java \
+    test/ImperialBotRecoveryTest.java \
     test/RocketReadinessTest.java \
     test-stubs/de/athron/gitlab/imperial_dominion/Bot.java \
     test-stubs/de/athron/gitlab/imperial_dominion/BotInterface.java \
@@ -18,4 +19,5 @@ javac -Xlint:all -Werror -d "$build_dir" \
     test-stubs/de/athron/gitlab/imperial_dominion/jni/libgame/ResourceName.java
 
 java -ea -cp "$build_dir" ActionCooldownTest
+java -ea -cp "$build_dir" ImperialBotRecoveryTest
 java -ea -cp "$build_dir" RocketReadinessTest
