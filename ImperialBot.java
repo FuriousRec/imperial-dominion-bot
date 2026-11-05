@@ -50,6 +50,13 @@ public class ImperialBot implements BotInterface {
     }
 
     public void executeTurn(StateInterface state, Bot bot) {
+        // A terminal state is immutable. The engine may still invoke the bot while
+        // displaying the final result, so do not query strategy resources or submit
+        // recovery/stage actions after the simulation has completed or failed.
+        if (state.isComplete() || state.isFailed()) {
+            return;
+        }
+
         // ANCHOR: PRINT BLOCK
         if (state.getRound() % 5 == 0) {
             System.out.println();

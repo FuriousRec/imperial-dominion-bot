@@ -14,6 +14,8 @@ public final class ImperialBotRecoveryTest {
     public static void main(String[] args) {
         ImperialBotRecoveryTest test = new ImperialBotRecoveryTest();
         test.doesNotRepeatAcceptedEmergencyActionDuringCooldown();
+        test.doesNotScheduleActionsAfterCompletion();
+        test.doesNotScheduleActionsAfterFailure();
         System.out.println(
                 "ImperialBotRecoveryTest: "
                         + test.assertions
@@ -43,6 +45,32 @@ public final class ImperialBotRecoveryTest {
         equal(2, state.actions.size(), "recovery may be retried when cooldown expires");
     }
 
+    private void doesNotScheduleActionsAfterCompletion() {
+        FakeState state = emergencyState();
+        state.complete = true;
+
+        new ImperialBot().executeTurn(state, new Bot());
+
+        equal(0, state.actions.size(), "completed game must not schedule recovery");
+    }
+
+    private void doesNotScheduleActionsAfterFailure() {
+        FakeState state = emergencyState();
+        state.failed = true;
+
+        new ImperialBot().executeTurn(state, new Bot());
+
+        equal(0, state.actions.size(), "failed game must not schedule recovery");
+    }
+
+    private FakeState emergencyState() {
+        FakeState state = new FakeState();
+        state.set(ResourceName.WORKER_WITHOUT_JOB, 0);
+        state.set(ResourceName.WORKER_WITH_JOB, 11);
+        state.round = 1;
+        return state;
+    }
+
     private void equal(Object expected, Object actual, String message) {
         assertions++;
         if (!expected.equals(actual)) {
@@ -56,6 +84,8 @@ public final class ImperialBotRecoveryTest {
                 new EnumMap<>(ResourceName.class);
         private final List<RecipeName> actions = new ArrayList<>();
         private long round;
+        private boolean complete;
+        private boolean failed;
 
         void set(ResourceName resource, int value) {
             resources.put(resource, value);
@@ -83,12 +113,12 @@ public final class ImperialBotRecoveryTest {
 
         @Override
         public boolean isComplete() {
-            return false;
+            return complete;
         }
 
         @Override
         public boolean isFailed() {
-            return false;
+            return failed;
         }
 
         @Override
