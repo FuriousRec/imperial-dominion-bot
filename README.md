@@ -41,7 +41,8 @@ Game ended with: COMPLETE (SUCCESS)
 The repository includes minimal API stubs for the proprietary course engine. They
 allow CI to compile the complete bot source without redistributing the engine,
 while engine-independent tests verify action cooldown behavior, bot-level
-emergency recovery scheduling, and the final Rocket Science readiness policy.
+emergency recovery scheduling, terminal-state safety, and the final Rocket
+Science readiness policy.
 
 ```bash
 bash test/run-tests.sh
