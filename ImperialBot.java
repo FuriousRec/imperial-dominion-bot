@@ -27,6 +27,11 @@ public class ImperialBot implements BotInterface {
     private final ActionCooldown actionCooldown = new ActionCooldown();
 
     public void init(Bot bot) {
+        // The engine may reuse a bot instance for another simulation. Strategy
+        // progress and accepted-action cooldowns belong to one game only.
+        stage = 0;
+        actionCooldown.clear();
+
         printRecipe(bot, RecipeName.HIRE_WORKER);
         printRecipe(bot, RecipeName.BUILD_HOUSE);
         printRecipe(bot, RecipeName.BUILD_WIND_POWER);

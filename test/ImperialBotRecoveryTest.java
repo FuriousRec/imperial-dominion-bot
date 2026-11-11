@@ -14,6 +14,8 @@ public final class ImperialBotRecoveryTest {
     public static void main(String[] args) {
         ImperialBotRecoveryTest test = new ImperialBotRecoveryTest();
         test.doesNotRepeatAcceptedEmergencyActionDuringCooldown();
+        test.initClearsAcceptedActionCooldown();
+        test.initResetsStrategyStage();
         test.doesNotScheduleActionsAfterCompletion();
         test.doesNotScheduleActionsAfterFailure();
         System.out.println(
@@ -43,6 +45,49 @@ public final class ImperialBotRecoveryTest {
         state.round = 5;
         bot.executeTurn(state, new Bot());
         equal(2, state.actions.size(), "recovery may be retried when cooldown expires");
+    }
+
+    private void initClearsAcceptedActionCooldown() {
+        ImperialBot bot = new ImperialBot();
+        FakeState firstGame = emergencyState();
+
+        bot.executeTurn(firstGame, new Bot());
+        equal(1, firstGame.actions.size(), "first game recovery action count");
+
+        bot.init(new Bot());
+
+        FakeState secondGame = emergencyState();
+        secondGame.round = 0;
+        bot.executeTurn(secondGame, new Bot());
+
+        equal(1, secondGame.actions.size(),
+                "new game must not inherit the previous action cooldown");
+        equal(RecipeName.FIRE_WORKER, secondGame.actions.get(0),
+                "new game recovery recipe");
+    }
+
+    private void initResetsStrategyStage() {
+        ImperialBot bot = new ImperialBot();
+        FakeState progressedGame = new FakeState();
+        progressedGame.set(ResourceName.WORKER_WITHOUT_JOB, 1);
+        progressedGame.set(ResourceName.WORKER_WITH_JOB, 12);
+
+        bot.executeTurn(progressedGame, new Bot());
+        equal(0, progressedGame.actions.size(),
+                "progressed game reaches the wind-power stage without an action");
+
+        bot.init(new Bot());
+
+        FakeState secondGame = new FakeState();
+        secondGame.set(ResourceName.WORKER_WITHOUT_JOB, 6);
+        secondGame.set(ResourceName.WORKER_WITH_JOB, 0);
+        secondGame.set(ResourceName.CURRENCY, 50);
+        bot.executeTurn(secondGame, new Bot());
+
+        equal(1, secondGame.actions.size(),
+                "new game must start from the worker-hiring stage");
+        equal(RecipeName.HIRE_WORKER, secondGame.actions.get(0),
+                "new game opening recipe");
     }
 
     private void doesNotScheduleActionsAfterCompletion() {
