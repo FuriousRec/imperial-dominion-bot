@@ -10,6 +10,7 @@ The bot plans long-term resource development across workers, housing, energy, fo
 - Resource balancing for food, energy, wood, iron, workers, and building slots
 - Safety logic to avoid running out of available workers
 - Cooldown enforcement for both emergency recovery and normal stage actions
+- Safe bot-instance reuse with per-game strategy and cooldown state reset
 - Diagnostic logging for stage progress and blocked actions
 - Explicit Rocket Science blockers based on actually available workers
 - Completed a full run ending in `COMPLETE (SUCCESS)`
@@ -42,7 +43,8 @@ The repository includes minimal API stubs for the proprietary course engine. The
 allow CI to compile the complete bot source without redistributing the engine,
 while engine-independent tests verify action cooldown behavior, bot-level
 emergency recovery scheduling, terminal-state safety, and the final Rocket
-Science readiness policy.
+Science readiness policy. Lifecycle regressions also verify that reinitializing
+a bot cannot leak strategy progress or cooldown state into a new simulation.
 
 ```bash
 bash test/run-tests.sh
