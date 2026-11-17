@@ -11,7 +11,14 @@ final class ActionCooldown {
     private String waitingFor = "";
 
     boolean isWaiting(long currentRound) {
-        return currentRound < waitUntilRound;
+        if (waitUntilRound < 0) {
+            return false;
+        }
+        if (currentRound >= waitUntilRound) {
+            clear();
+            return false;
+        }
+        return true;
     }
 
     String waitingFor() {
@@ -28,14 +35,14 @@ final class ActionCooldown {
             long delayRounds,
             String label) {
 
-        if (!scheduled) {
-            clear();
-            return;
-        }
-
         if (delayRounds < 0) {
             throw new IllegalArgumentException(
                     "delayRounds must not be negative");
+        }
+
+        if (!scheduled) {
+            clear();
+            return;
         }
 
         waitingFor = Objects.requireNonNull(

@@ -62,6 +62,11 @@ public class ImperialBot implements BotInterface {
             return;
         }
 
+        // Advance cooldown state before diagnostics so an elapsed action does
+        // not remain displayed as pending after its deadline.
+        boolean waitingForAcceptedAction =
+                actionCooldown.isWaiting(state.getRound());
+
         // ANCHOR: PRINT BLOCK
         if (state.getRound() % 5 == 0) {
             System.out.println();
@@ -122,7 +127,7 @@ public class ImperialBot implements BotInterface {
         // Apply the cooldown before every recovery or stage action. In particular,
         // an accepted emergency FIRE_WORKER action may take several rounds to settle;
         // resubmitting it early can fire more workers than the strategy intended.
-        if (actionCooldown.isWaiting(state.getRound())) {
+        if (waitingForAcceptedAction) {
             return;
         }
 

@@ -14,6 +14,7 @@ public final class ImperialBotRecoveryTest {
     public static void main(String[] args) {
         ImperialBotRecoveryTest test = new ImperialBotRecoveryTest();
         test.doesNotRepeatAcceptedEmergencyActionDuringCooldown();
+        test.retriesRejectedEmergencyActionWithoutCooldown();
         test.initClearsAcceptedActionCooldown();
         test.initResetsStrategyStage();
         test.doesNotScheduleActionsAfterCompletion();
@@ -45,6 +46,30 @@ public final class ImperialBotRecoveryTest {
         state.round = 5;
         bot.executeTurn(state, new Bot());
         equal(2, state.actions.size(), "recovery may be retried when cooldown expires");
+    }
+
+    private void retriesRejectedEmergencyActionWithoutCooldown() {
+        ImperialBot bot = new ImperialBot();
+        FakeState state = emergencyState();
+        state.acceptActions = false;
+
+        bot.executeTurn(state, new Bot());
+        equal(1, state.actions.size(), "first rejected recovery request");
+
+        state.round++;
+        bot.executeTurn(state, new Bot());
+        equal(2, state.actions.size(),
+                "rejected recovery must be retried on the next round");
+
+        state.acceptActions = true;
+        state.round++;
+        bot.executeTurn(state, new Bot());
+        equal(3, state.actions.size(), "accepted recovery request");
+
+        state.round++;
+        bot.executeTurn(state, new Bot());
+        equal(3, state.actions.size(),
+                "accepted retry must start the normal cooldown");
     }
 
     private void initClearsAcceptedActionCooldown() {
@@ -131,6 +156,7 @@ public final class ImperialBotRecoveryTest {
         private long round;
         private boolean complete;
         private boolean failed;
+        private boolean acceptActions = true;
 
         void set(ResourceName resource, int value) {
             resources.put(resource, value);
@@ -172,7 +198,7 @@ public final class ImperialBotRecoveryTest {
                 throw new AssertionError("expected a single scheduled action");
             }
             actions.add(recipe);
-            return new ActionResult();
+            return new ActionResult(acceptActions);
         }
     }
 }

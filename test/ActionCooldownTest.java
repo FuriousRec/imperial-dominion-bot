@@ -8,6 +8,7 @@ public final class ActionCooldownTest {
         test.failedAttemptClearsStaleCooldown();
         test.clearResetsState();
         test.rejectsNegativeDelay();
+        test.rejectsNegativeDelayForFailedAttempt();
         System.out.println(
                 "ActionCooldownTest: "
                         + test.assertions
@@ -29,9 +30,11 @@ public final class ActionCooldownTest {
 
         check(cooldown.isWaiting(40), "wait starts immediately");
         check(cooldown.isWaiting(44), "wait covers intermediate rounds");
+        equal("BUILD_FARM", cooldown.waitingFor(), "active label");
+        equal(45L, cooldown.waitUntilRound(), "active deadline");
         check(!cooldown.isWaiting(45), "wait ends at the deadline");
-        equal("BUILD_FARM", cooldown.waitingFor(), "accepted label");
-        equal(45L, cooldown.waitUntilRound(), "accepted deadline");
+        equal("", cooldown.waitingFor(), "expired label");
+        equal(-1L, cooldown.waitUntilRound(), "expired deadline");
     }
 
     private void failedAttemptClearsStaleCooldown() {
@@ -62,6 +65,18 @@ public final class ActionCooldownTest {
         try {
             cooldown.recordAttempt(true, 0, -1, "INVALID");
             throw new AssertionError("negative delay was accepted");
+        } catch (IllegalArgumentException expected) {
+            assertions++;
+        }
+    }
+
+    private void rejectsNegativeDelayForFailedAttempt() {
+        ActionCooldown cooldown = new ActionCooldown();
+
+        try {
+            cooldown.recordAttempt(false, 0, -1, "INVALID");
+            throw new AssertionError(
+                    "negative delay was accepted for a failed attempt");
         } catch (IllegalArgumentException expected) {
             assertions++;
         }
