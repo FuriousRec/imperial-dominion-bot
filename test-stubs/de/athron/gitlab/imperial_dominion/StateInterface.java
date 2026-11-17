@@ -13,8 +13,18 @@ public interface StateInterface {
     ActionResult scheduleAction(RecipeName recipe, int amount);
 
     final class ActionResult {
+        private final boolean accepted;
+
+        public ActionResult() {
+            this(true);
+        }
+
+        public ActionResult(boolean accepted) {
+            this.accepted = accepted;
+        }
+
         public boolean get() {
-            return true;
+            return accepted;
         }
     }
 }

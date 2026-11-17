@@ -10,6 +10,7 @@ The bot plans long-term resource development across workers, housing, energy, fo
 - Resource balancing for food, energy, wood, iron, workers, and building slots
 - Safety logic to avoid running out of available workers
 - Cooldown enforcement for both emergency recovery and normal stage actions
+- Immediate retry after engine-rejected actions, with cooldown only after acceptance
 - Safe bot-instance reuse with per-game strategy and cooldown state reset
 - Diagnostic logging for stage progress and blocked actions
 - Explicit Rocket Science blockers based on actually available workers
@@ -45,6 +46,9 @@ while engine-independent tests verify action cooldown behavior, bot-level
 emergency recovery scheduling, terminal-state safety, and the final Rocket
 Science readiness policy. Lifecycle regressions also verify that reinitializing
 a bot cannot leak strategy progress or cooldown state into a new simulation.
+The engine stub can model accepted and rejected schedule requests, proving that
+rejections are retried on the next round while accepted actions remain bounded
+by their cooldown. Expired cooldown labels are cleared before diagnostics.
 
 ```bash
 bash test/run-tests.sh
